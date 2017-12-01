@@ -6,10 +6,8 @@
 	function getCaptcha($input, $part2 = false) {
 		$total = 0;
 		for ($i = 0; $i < strlen($input); $i++) {
-			$n = (int)$input{$i};
-			$next = (int)$input{($i + ($part2 ? strlen($input) / 2 : 1)) % strlen($input)};
-			if ($n == $next) {
-				$total += $n;
+			if ($input{$i} == $input{($i + ($part2 ? strlen($input) / 2 : 1)) % strlen($input)}) {
+				$total += $input{$i};
 			}
 		}
 		return $total;
