@@ -193,10 +193,11 @@
 				$set = array_merge($combination, array($element));
 				if (count($set) <= $maxlength) {
 					$result[] = $set;
-					if (count($set) >= $minlength) { yield $set; }
 				}
 			}
 		}
+
+		return $minlength <= 0 ? $result : array_filter($result, function ($a) use ($minlength) { return count($a) >= $minlength; });
 	}
 
 	/**
