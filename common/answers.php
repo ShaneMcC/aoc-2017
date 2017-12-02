@@ -6,8 +6,8 @@
 	$answers[2][1] = 1024;
 
 	// Day 2
-	$answers[1][2] = NULL;
-	$answers[2][2] = NULL;
+	$answers[1][2] = 21845;
+	$answers[2][2] = 191;
 
 	// Day 3
 	$answers[1][3] = NULL;
