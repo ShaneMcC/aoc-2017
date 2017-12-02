@@ -5,14 +5,13 @@
 
 	$lines = array();
 	foreach ($input as $line) {
-		preg_match_all('#([0-9]+)#S', $line, $m);
-		$lines[] = $m[1];
+		$lines[] = sorted('sort', preg_split("#\s+#", $line));
 	}
 
 	function getChecksumAll($lines) {
 		$checksum = 0;
 		foreach ($lines as $l) {
-			$checksum += max($l) - min($l);
+			$checksum += $l[count($l) - 1] - $l[0];
 		}
 		return $checksum;
 	}
@@ -20,9 +19,9 @@
 	function getChecksumEven($lines) {
 		$checksum = 0;
 		foreach ($lines as $l) {
-			foreach (getAllSets(sorted('sort', $l), 2, 2) as $s) {
-				if ($s[0] % $s[1] == 0) {
-					$checksum += $s[0] / $s[1];
+			foreach (getAllSets($l, 2, 2) as $s) {
+				if ($s[1] % $s[0] == 0) {
+					$checksum += $s[1] / $s[0];
 				}
 			}
 		}
