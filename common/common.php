@@ -182,19 +182,21 @@
 	 *
 	 * @param $array Array to get sets from.
 	 * @param $maxLength Ignore sets larger than this size
+	 * @param $minLength Ignore sets smaller than this size
 	 * @return Array of sets.
 	 */
-	function getAllSets($array, $maxlength = PHP_INT_MAX) {
+	function getAllSets($array, $maxlength = PHP_INT_MAX, $minlength = 0) {
 		$result = array(array());
 
 		foreach ($array as $element) {
 			foreach ($result as $combination) {
 				$set = array_merge(array($element), $combination);
-				if (count($set) <= $maxlength) { $result[] = $set; }
+				if (count($set) <= $maxlength) {
+					$result[] = $set;
+					if (count($set) >= $minlength) { yield $set; }
+				}
 			}
 		}
-
-		return $result;
 	}
 
 	/**
