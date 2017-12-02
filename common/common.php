@@ -190,7 +190,7 @@
 
 		foreach ($array as $element) {
 			foreach ($result as $combination) {
-				$set = array_merge(array($element), $combination);
+				$set = array_merge($combination, array($element));
 				if (count($set) <= $maxlength) {
 					$result[] = $set;
 					if (count($set) >= $minlength) { yield $set; }
