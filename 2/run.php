@@ -20,13 +20,9 @@
 	function getChecksumEven($lines) {
 		$checksum = 0;
 		foreach ($lines as $l) {
-			for ($i = 0; $i < count($l); $i++) {
-				for ($j = $i+1; $j < count($l); $j++) {
-					$min = min($l[$i], $l[$j]);
-					$max = max($l[$i], $l[$j]);
-					if ($max % $min == 0) {
-						$checksum += $max / $min;
-					}
+			foreach (getAllSets(sorted('sort', $l), 2, 2) as $s) {
+				if ($s[0] % $s[1] == 0) {
+					$checksum += $s[0] / $s[1];
 				}
 			}
 		}
