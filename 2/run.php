@@ -24,6 +24,9 @@
 					$checksum += $s[1] / $s[0];
 				}
 			}
+
+			// Alternative:
+			// $checksum += array_reduce(array_filter(getAllSets($l, 2, 2), function($a) { return $a[1] % $a[0] == 0; }), function ($c, $i) { return $i[1] / $i[0]; });
 		}
 		return $checksum;
 	}
