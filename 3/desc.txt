@@ -18,10 +18,6 @@ Data from square 23 is carried only 2 steps: up twice.
 Data from square 1024 must be carried 31 steps.
 How many steps are required to carry the data from the square identified in your puzzle input all the way to the access port?
 
-Your puzzle answer was 438.
-
-The first half of this puzzle is complete! It provides one gold star: *
-
 --- Part Two ---
 As a stress test on the system, the programs here clear the grid and then store the value 1 in square 1. Then, in the same allocation order as shown above, they store the sum of the values in all adjacent squares, including diagonals.
 
