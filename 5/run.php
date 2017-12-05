@@ -6,7 +6,7 @@
 	function runInstructions($instructions, $part2 = false) {
 		$count = 0;
 		for ($i = 0; $i < count($instructions); ) {
-			$diff = $part2 ? ($instructions[$i] >= 3 ? -1 : 1) : 1;
+			$diff = $part2 && $instructions[$i] >= 3 ? -1 : 1;
 			$instructions[$i] += $diff;
 			$i += $instructions[$i] - $diff;
 			$count++;
