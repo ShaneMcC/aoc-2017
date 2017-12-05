@@ -5,7 +5,7 @@
 
 	function runInstructions($instructions, $part2 = false) {
 		$i = $count = 0;
-		while ($i < count($instructions)) {
+		while ($i >= 0 && $i < count($instructions)) {
 			$i += ($part2 && $instructions[$i] >= 3) ? $instructions[$i]-- : $instructions[$i]++;
 			$count++;
 		}
