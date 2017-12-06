@@ -16,7 +16,13 @@
 			$max = max($banks);
 			$location = array_search($max, $banks);
 			$banks[$location] = 0;
-			for ($i = 1; $i <= $max; $i++) {
+
+			// Distribute equal amounts
+			for ($i = 0; $i < count($banks); $i++) {
+				$banks[$i] += floor($max / count($banks));
+			}
+			// Distribute un-equal remainders.
+			for ($i = 1; $i <= ($max % count($banks)); $i++) {
 				$banks[($location + $i) % count($banks)]++;
 			}
 		}
