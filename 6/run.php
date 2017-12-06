@@ -3,13 +3,13 @@
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$banks = preg_split('#\s+#', getInputLine());
 
-	function reallocateBanks($banks, $part2 = false) {
+	function reallocateBanks($banks) {
 		$seen = [];
 
 		while (true) {
 			$checksum = crc32(json_encode($banks));
 			if (in_array($checksum, $seen)) {
-				return $part2 ? count($seen) - array_search($checksum, $seen) : count($seen);
+				return [count($seen), count($seen) - array_search($checksum, $seen)];
 			}
 			$seen[] = $checksum;
 
@@ -22,5 +22,7 @@
 		}
 	}
 
-	echo 'Part 1: ', reallocateBanks($banks), "\n";
-	echo 'Part 2: ', reallocateBanks($banks, true), "\n";
+	list($part1, $part2) = reallocateBanks($banks);
+
+	echo 'Part 1: ', $part1, "\n";
+	echo 'Part 2: ', $part2, "\n";
