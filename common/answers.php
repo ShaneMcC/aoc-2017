@@ -27,7 +27,7 @@
 
 	// Day 7
 	$answers[1][7] = 'uownj';
-	$answers[2][7] = NULL;
+	$answers[2][7] = 596;
 
 	// Day 8
 	$answers[1][8] = NULL;
