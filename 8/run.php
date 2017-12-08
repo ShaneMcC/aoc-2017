@@ -27,12 +27,10 @@
 
 	$highestEver = 0;
 	foreach ($instructions as $inst) {
-		$do = false;
 		$if = $inst['if'];
 
 		if (isset($ifActions[$if['action']])) {
 			if ($ifActions[$if['action']]($registers[$if['register']], $if['value'])) {
-
 				if (isset($doActions[$inst['action']])) {
 					$registers[$inst['register']] = $doActions[$inst['action']]($registers[$inst['register']], $inst['value']);
 				} else {
@@ -47,6 +45,5 @@
 	}
 
 	$highestEnd = max($registers);
-
 	echo 'Part 1: ', $highestEnd, "\n";
 	echo 'Part 2: ', $highestEver, "\n";
