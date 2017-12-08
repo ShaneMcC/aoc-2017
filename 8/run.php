@@ -13,33 +13,40 @@
 		$instructions[] = ['register' => $register, 'action' => $action, 'value' => $value, 'if' => ['register' => $ifregister, 'action' => $ifaction, 'value' => $ifvalue], 'desc' => $all];
 	}
 
+	$ifActions = ['>' => function ($reg, $value) { return $reg > $value; },
+	              '>=' => function ($reg, $value) { return $reg >= $value; },
+	              '<' => function ($reg, $value) { return $reg < $value; },
+	              '!=' => function ($reg, $value) { return $reg != $value; },
+	              '==' => function ($reg, $value) { return $reg == $value; },
+	              '<=' => function ($reg, $value) { return $reg <= $value; },
+	             ];
+
+	$doActions = ['inc' => function ($reg, $value) { return $reg += $value; },
+	              'dec' => function ($reg, $value) { return $reg -= $value; },
+	             ];
+
 	$highestEver = 0;
 	foreach ($instructions as $inst) {
 		$do = false;
 		$if = $inst['if'];
 
-		if ($if['action'] == '>') { $do = $registers[$if['register']] > $if['value']; }
-		else if ($if['action'] == '>=') { $do = $registers[$if['register']] >= $if['value']; }
-		else if ($if['action'] == '<') { $do = $registers[$if['register']] < $if['value']; }
-		else if ($if['action'] == '!=') { $do = $registers[$if['register']] != $if['value']; }
-		else if ($if['action'] == '==') { $do = $registers[$if['register']] == $if['value']; }
-		else if ($if['action'] == '<=') { $do = $registers[$if['register']] <= $if['value']; }
-		else { die('Unknown if: ' . $inst['desc'] . "\n"); }
+		if (isset($ifActions[$if['action']])) {
+			if ($ifActions[$if['action']]($registers[$if['register']], $if['value'])) {
 
-		if ($do) {
-			if ($inst['action'] == 'inc') { $registers[$inst['register']] += $inst['value']; }
-			else if ($inst['action'] == 'dec') { $registers[$inst['register']] -= $inst['value']; }
-			else { die('Unknown action: ' . $inst['desc'] . "\n"); }
+				if (isset($doActions[$inst['action']])) {
+					$registers[$inst['register']] = $doActions[$inst['action']]($registers[$inst['register']], $inst['value']);
+				} else {
+					die('Unknown action: ' . $inst['desc'] . "\n");
+				}
 
-			$highestEver = max($highestEver, $registers[$inst['register']]);
+				$highestEver = max($highestEver, $registers[$inst['register']]);
+			}
+		} else {
+			die('Unknown if: ' . $inst['desc'] . "\n");
 		}
 	}
 
-	$highestEnd = 0;
-	foreach ($registers as $reg => $value) {
-		$highestEnd = max($highestEnd, $value);
-	}
-
+	$highestEnd = max($registers);
 
 	echo 'Part 1: ', $highestEnd, "\n";
 	echo 'Part 2: ', $highestEver, "\n";
