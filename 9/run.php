@@ -4,37 +4,16 @@
 	$input = getInputLine();
 
 	$current = $total = $garbageTotal = 0;
-
 	$cancelled = $inGarbage = FALSE;
 
 	foreach (str_split($input) as $c) {
-		debugOut($c, ': ');
-
-		if ($cancelled) {
-			debugOut('CANCELLED', "\n");
-			$cancelled = false;
-		} else if ($c == '!') {
-			debugOut('NEXT CANCELLED', "\n");
-			$cancelled = true;
-		} else if (!$inGarbage && $c == '<') {
-			debugOut('ENTER GARBAGE', "\n");
-			$inGarbage = true;
-		} else if ($c == '>') {
-			debugOut('EXIT GARBAGE', "\n");
-			$inGarbage = false;
-		} else if (!$inGarbage && $c == '{') {
-			$current++;
-			debugOut('NEW GROUP: ', $current, "\n");
-		} else if (!$inGarbage && $c == '}') {
-			debugOut('END GROUP: ', $current, "\n");
-			$total += $current;
-			$current--;
-		} else if ($inGarbage) {
-			debugOut('GARBAGE', "\n");
-			$garbageTotal++;
-		} else {
-			debugOut("\n");
-		}
+		if ($cancelled) { $cancelled = false; }
+		else if ($c == '!') { $cancelled = true; }
+		else if ($c == '>') { $inGarbage = false; }
+		else if ($inGarbage) { $garbageTotal++; }
+		else if (!$inGarbage && $c == '<') { $inGarbage = true; }
+		else if (!$inGarbage && $c == '{') { $current++; }
+		else if (!$inGarbage && $c == '}') { $total += $current--; }
 	}
 
 	echo 'Part 1: ', $total, "\n";
