@@ -38,8 +38,8 @@
 	$answers[2][9] = 4322;
 
 	// Day 10
-	$answers[1][10] = NULL;
-	$answers[2][10] = NULL;
+	$answers[1][10] = 38628;
+	$answers[2][10] = 'e1462100a34221a7f0906da15c1c979a';
 
 	// Day 11
 	$answers[1][11] = NULL;
