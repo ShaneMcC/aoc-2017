@@ -7,7 +7,7 @@
 		$seen = [];
 
 		while (true) {
-			$checksum = crc32(json_encode($banks));
+			$checksum = json_encode($banks);
 			if (in_array($checksum, $seen)) {
 				return [count($seen), count($seen) - array_search($checksum, $seen)];
 			}

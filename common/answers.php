@@ -42,8 +42,8 @@
 	$answers[2][10] = 'e1462100a34221a7f0906da15c1c979a';
 
 	// Day 11
-	$answers[1][11] = NULL;
-	$answers[2][11] = NULL;
+	$answers[1][11] = 715;
+	$answers[2][11] = 1512;
 
 	// Day 12
 	$answers[1][12] = NULL;
