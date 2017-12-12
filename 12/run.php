@@ -11,14 +11,14 @@
 		$programs[$name] = ['pipes' => explode(', ', $pipes)];
 	}
 
-	function countPrograms($programs, $name, &$known) {
+	function countPrograms($programs, $name, $known = []) {
 		if (!in_array($name, $known)) { $known[] = $name; }
-
 		foreach ($programs[$name]['pipes'] as $pipe) {
 			if (!in_array($pipe, $known)) {
-				countPrograms($programs, $pipe, $known);
+				$known = countPrograms($programs, $pipe, $known);
 			}
 		}
+		return $known;
 	}
 
 	$groups = [];
@@ -29,10 +29,8 @@
 			}
 		}
 
-		$groups[$p] = [];
-		countPrograms($programs, $p, $groups[$p]);
+		$groups[$p] = countPrograms($programs, $p);
 	}
-
 
 	echo 'Part 1: ', count($groups[0]), "\n";
 	echo 'Part 2: ', count($groups), "\n";
