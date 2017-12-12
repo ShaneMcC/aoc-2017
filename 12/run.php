@@ -8,9 +8,7 @@
 	foreach ($input as $details) {
 		preg_match('#(.*) <-> (.*)?#SADi', $details, $m);
 		list($all, $name, $pipes) = $m;
-		$pipes = explode(', ', $pipes);
-
-		$programs[$name] = ['pipes' => $pipes];
+		$programs[$name] = ['pipes' => explode(', ', $pipes)];
 	}
 
 	function countPrograms($programs, $name, &$known) {
@@ -22,10 +20,6 @@
 			}
 		}
 	}
-
-	$part1 = [];
-	countPrograms($programs, '0', $part1);
-	echo 'Part 1: ', count($part1), "\n";
 
 	$groups = [];
 	foreach ($programs as $p => $pinfo) {
@@ -39,4 +33,6 @@
 		countPrograms($programs, $p, $groups[$p]);
 	}
 
+
+	echo 'Part 1: ', count($groups[0]), "\n";
 	echo 'Part 2: ', count($groups), "\n";
