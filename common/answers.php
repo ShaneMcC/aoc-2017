@@ -46,8 +46,8 @@
 	$answers[2][11] = 1512;
 
 	// Day 12
-	$answers[1][12] = NULL;
-	$answers[2][12] = NULL;
+	$answers[1][12] = 115;
+	$answers[2][12] = 221;
 
 	// Day 13
 	$answers[1][13] = NULL;
