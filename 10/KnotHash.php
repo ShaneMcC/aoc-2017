@@ -80,20 +80,21 @@
 			return $this->foldedlist->getList();
 		}
 
-		public function hash() {
+		public function hash($asString = true) {
 			for ($i = 0; $i < 64; $i++) {
 				$this->runRound();
 			}
 
 			$denseHash = [];
 			for ($i = 0; $i < $this->foldedlist->getSize(); $i += 16) {
-				$denseHash[] = sprintf("%02x", array_reduce($this->foldedlist->getNext(16, $i), function ($c, $i) { return ($c == NULL ? $i : $c ^ $i); }));
+				$val = array_reduce($this->foldedlist->getNext(16, $i), function ($c, $i) { return ($c == NULL ? $i : $c ^ $i); });
+				$denseHash[] = $asString ? sprintf("%02x", $val) : $val;
 			}
 
-			return implode($denseHash);
+			return $asString ? implode($denseHash) : $denseHash;
 		}
 
-		public static function getHash($input) {
-			return (new KnotHash())->setInputString($input)->hash();
+		public static function getHash($input, $asString = true) {
+			return (new KnotHash())->setInputString($input)->hash($asString);
 		}
 	}

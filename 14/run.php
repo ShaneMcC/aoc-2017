@@ -5,19 +5,19 @@
 	$input = getInputLine();
 
 	$rows = [];
-
+	$part1 = 0;
 	for ($i = 0; $i < 128; $i++) {
-		$rows[$i] = '';
-		foreach (str_split(KnotHash::getHash($input . '-' . $i)) as $hex) {
-			$rows[$i] .= str_pad(base_convert($hex, 16, 2), 4, '0', STR_PAD_LEFT);
+		$row = '';
+		foreach (KnotHash::getHash($input . '-' . $i, false) as $val) {
+			$row .= str_pad(base_convert($val, 10, 2), 8, '0', STR_PAD_LEFT);
 		}
 
-		$rows[$i] = str_replace('0', '.', $rows[$i]);
-		$rows[$i] = str_replace('1', '#', $rows[$i]);
-		$rows[$i] = str_split($rows[$i]);
+		$row = str_replace('0', '.', $row);
+		$row = str_replace('1', '#', $row);
+		$part1 += substr_count($row, '#');
+		$rows[$i] = str_split($row);
 	}
 
-	$part1 = array_reduce($rows, function ($c, $i) { return ($c += substr_count(implode('', $i), '#')); }, 0);
 	echo 'Part 1: ', $part1, "\n";
 
 	function setRegion(&$rows, $x, $y, $region) {
