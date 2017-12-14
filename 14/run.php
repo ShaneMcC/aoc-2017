@@ -21,9 +21,11 @@
 	echo 'Part 1: ', $part1, "\n";
 
 	function setRegion(&$rows, $x, $y, $region) {
+		if ($rows[$y][$x] != '#') { return; }
 		$rows[$y][$x] = $region;
-		foreach (yieldXY($x-1, $y-1, $x+1, $y+1) as $x2 => $y2) {
-			if (($x2 == $x || $y2 == $y) && isset($rows[$y2][$x2]) && $rows[$y2][$x2] == '#') {
+
+		foreach ([[$x+1, $y], [$x-1, $y], [$x, $y+1], [$x, $y-1]] as [$x2, $y2]) {
+			if (isset($rows[$y2][$x2]) && $rows[$y2][$x2] == '#') {
 				setRegion($rows, $x2, $y2, $region);
 			}
 		}
