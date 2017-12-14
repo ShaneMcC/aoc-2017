@@ -5,7 +5,7 @@
 		private $position = 0;
 
 		function __construct($size) {
-			$this->list = array_keys(array_fill(0, $size, ''));
+			$this->list = range(0, $size - 1);
 		}
 
 		function getSize() {
@@ -13,7 +13,7 @@
 		}
 
 		public function reset() {
-			$this->list = array_keys(array_fill(0, $this->getSize(), ''));
+			$this->list = range(0, $this->getSize() - 1);
 			$this->position = 0;
 			$this->skipSize = 0;
 		}
