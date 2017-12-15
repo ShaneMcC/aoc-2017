@@ -22,24 +22,25 @@
 		$generator['B']['multiple'] = ($part2) ? 8 : 1;
 
 		$matches = 0;
-		for ($i = 0; $i < ($part2 ? 5000000 : 40000000); $i++) {
+		for ($i = 0; $i < (isTest() ? 5 : ($part2 ? 5000000 : 40000000)); $i++) {
 			foreach ($generator as $name => &$info) {
 				do {
 					$info['value'] = ($info['value'] * $info['factor']) % $divider;
 				} while ($info['value'] % $info['multiple'] != 0);
 			}
 
-			$a = substr(base_convert($generator['A']['value'], 10, 2), -16);
-			$b = substr(base_convert($generator['B']['value'], 10, 2), -16);
-
+			$a = $generator['A']['value'] & 65535;
+			$b = $generator['B']['value'] & 65535;
 			if ($a == $b) { $matches++; }
+			if (isDebug() && $i > 0 && $i % 1000000 == 0) { echo $i, "\n"; }
 		}
 
 		return $matches;
 	}
 
 	echo 'This will take a while...', "\n";
-
-	echo 'Part 1: ', getMatches($generator), "\n";
-	echo 'Part 2: ', getMatches($generator, true), "\n";
+	$part1 = getMatches($generator);
+	echo 'Part 1: ', $part1, "\n";
+	$part2 = getMatches($generator, true);
+	echo 'Part 2: ', $part2, "\n";
 
