@@ -58,8 +58,8 @@
 	$answers[2][14] = 1164;
 
 	// Day 15
-	$answers[1][15] = NULL;
-	$answers[2][15] = NULL;
+	$answers[1][15] = 612;
+	$answers[2][15] = 285;
 
 	// Day 16
 	$answers[1][16] = NULL;
