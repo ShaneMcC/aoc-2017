@@ -19,7 +19,10 @@
 		$position = (($position + $input) % $i) + 1;
 
 		if ($position == 1) { $part2 = $i; }
-		if (isDebug() && $i > 0 && $i % 1000000 == 0) { echo $i, "\n"; }
+
+		$skip = floor(($i - $position) / $input);
+		$position = ($position + ($input * $skip) + $skip);
+		$i += $skip;
 	}
 
 	echo 'Part 2: ', $part2, "\n";
