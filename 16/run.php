@@ -12,19 +12,11 @@
 		foreach ($dance as $step) {
 			if (preg_match('#s([0-9]+)#', $step, $m)) {
 				$len = count($line);
-				$end = array_slice($line, $len - $m[1]);
-				array_splice($line, 0, 0, $end);
+				array_splice($line, 0, 0, array_slice($line, $len - $m[1]));
 				$line = array_slice($line, 0, $len);
-			} else if (preg_match('#x([0-9]+)/([0-9]+)#', $step, $m)) {
-				$a = $m[1];
-				$b = $m[2];
-
-				$line[$a] ^= $line[$b];
-				$line[$b] ^= $line[$a];
-				$line[$a] ^= $line[$b];
-			} else if (preg_match('#p(.+)/(.+)#', $step, $m)) {
-				$a = array_search($m[1], $line);
-				$b = array_search($m[2], $line);
+			} else if (preg_match('#([xp])(.+)/(.+)#', $step, $m)) {
+				$a = ($m[1] == 'x') ? $m[2] : array_search($m[2], $line);
+				$b = ($m[1] == 'x') ? $m[3] : array_search($m[3], $line);
 
 				$line[$a] ^= $line[$b];
 				$line[$b] ^= $line[$a];
