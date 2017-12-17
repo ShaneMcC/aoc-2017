@@ -29,8 +29,7 @@
 		$known = [];
 		for ($i = 0; $i < $times; $i++) {
 			if ($loopback = array_search($line, $known)) {
-				$loopsize = ($i - 1) - ($loopback - 1);
-				return $known[(($times - $i) % $loopsize) + $loopback];
+				return $known[(($times - $i) % ($i - $loopback)) + $loopback];
 			} else {
 				$known[] = $line;
 				$line = doDance($line, $dance);
