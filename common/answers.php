@@ -62,8 +62,8 @@
 	$answers[2][15] = 285;
 
 	// Day 16
-	$answers[1][16] = NULL;
-	$answers[2][16] = NULL;
+	$answers[1][16] = 'giadhmkpcnbfjelo';
+	$answers[2][16] = 'njfgilbkcoemhpad';
 
 	// Day 17
 	$answers[1][17] = NULL;
