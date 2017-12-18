@@ -70,8 +70,8 @@
 	$answers[2][17] = 1930815;
 
 	// Day 18
-	$answers[1][18] = NULL;
-	$answers[2][18] = NULL;
+	$answers[1][18] = 4601;
+	$answers[2][18] = 6858;
 
 	// Day 19
 	$answers[1][19] = NULL;
