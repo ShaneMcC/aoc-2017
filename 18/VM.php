@@ -150,6 +150,7 @@
 		 */
 		public function setMiscData($data, $value) {
 			$this->miscData[$data] = $value;
+			return $this;
 		}
 
 		/**

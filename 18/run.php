@@ -11,22 +11,14 @@
 
 	echo 'Part 1: ', $vm->getOutput(), "\n";
 
-	$vm1 = new VM($data);
-	$vm2 = new VM($data);
+	$vms = [['vm' => new VM($data), 'queue' => [], 'sendcount' => 0], ['vm' => new VM($data), 'queue' => [], 'sendcount' => 0]];
+	$vms[0]['vm']->setMiscData('pid', 0)->setMiscData('partner', 1);
+	$vms[1]['vm']->setMiscData('pid', 1)->setMiscData('partner', 0);
 
-	$vm1->setMiscData('pid', 0);
-	$vm1->setMiscData('partner', 1);
-
-	$vm2->setMiscData('pid', 1);
-	$vm2->setMiscData('partner', 0);
-
-	$vm1->setReg('p', $vm1->getMiscData('pid'));
-	$vm2->setReg('p', $vm2->getMiscData('pid'));
-
-	foreach ([$vm1, $vm2] as $vm) {
-		$__SNDCOUNT[$vm->getMiscData('pid')] = 0;
-		$__SND[$vm->getMiscData('pid')] = [];
-
+	foreach ($vms as $vminfo) {
+		$vm = $vminfo['vm'];
+		$vm->setDebug(isDebug());
+		$vm->setReg('p', $vm->getMiscData('pid'));
 		$vm->setMiscData('waiting', false);
 
 		/**
@@ -40,12 +32,11 @@
 		 * @param $vm VM to execute on.
 		 * @param $args Args for this instruction.
 		 */
-		$vm->setInstr('snd', function($vm, $args) {
-			global $__SND, $__SNDCOUNT;
+		$vm->setInstr('snd', function($vm, $args) use (&$vms) {
 			$x = $vm->isReg($args[0]) ? $vm->getReg($args[0]) : $args[0];
 
-			$__SND[$vm->getMiscData('partner')][] = $x;
-			$__SNDCOUNT[$vm->getMiscData('pid')]++;
+			$vms[$vm->getMiscData('partner')]['queue'][] = $x;
+			$vms[$vm->getMiscData('pid')]['sendcount']++;
 		});
 
 		/**
@@ -60,12 +51,10 @@
 		 * @param $vm VM to execute on.
 		 * @param $args Args for this instruction.
 		 */
-		$vm->setInstr('rcv', function($vm, $args) {
-			global $__SND;
-
+		$vm->setInstr('rcv', function($vm, $args) use (&$vms) {
 			$vm->setMiscData('waiting', false);
-			if (!empty($__SND[$vm->getMiscData('pid')])) {
-				$val = array_shift($__SND[$vm->getMiscData('pid')]);
+			if (!empty($vms[$vm->getMiscData('pid')]['queue'])) {
+				$val = array_shift($vms[$vm->getMiscData('pid')]['queue']);
 
 				$vm->setReg($args[0], $val);
 			} else {
@@ -78,13 +67,16 @@
 
 
 	while (true) {
-		$vm1->step();
-		$vm2->step();
+		$waiting = true;
+		foreach ($vms as $vminfo) {
+			$vminfo['vm']->step();
+			if (!$vminfo['vm']->getMiscData('waiting')) { $waiting = false; }
+		}
 
-		if ($vm1->getMiscData('waiting') && $vm2->getMiscData('waiting')) {
-			echo 'Both VMs stalled, exiting.', "\n";
+		if ($waiting) {
+			debugOut('All VMs stalled, exiting.', "\n");
 			break;
 		}
 	}
 
-	echo 'Part 2: ', $__SNDCOUNT[1], "\n";
+	echo 'Part 2: ', $vms[1]['sendcount'], "\n";
