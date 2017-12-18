@@ -5,11 +5,43 @@
 
 	$data = VM::parseInstrLines(getInputLines());
 	$vm = new VM($data);
+	$part1 = 0;
+
+	/**
+	 * snd
+	 *   - snd X
+	 *
+	 * plays a sound with a frequency equal to the value of X.
+	 *
+	 * @param $vm VM to execute on.
+	 * @param $args Args for this instruction.
+	 */
+	$vm->setInstr('snd', function($vm, $args) use (&$part1) {
+		$x = $vm->getValue($args[0]);
+		$part1 = $x;
+	});
+
+	/**
+	 * rcv
+	 *   - rcv X
+	 *
+	 * recovers the frequency of the last sound played, but only when
+	 * the value of X is not zero. (If it is zero, the command does
+	 * nothing.)
+	 *
+	 * @param $vm VM to execute on.
+	 * @param $args Args for this instruction.
+	 */
+	$vm->setInstr('rcv', function($vm, $args) {
+		$x = $vm->getValue($args[0]);
+
+		if ($x > 0) { $vm->end(0); }
+	});
 
 	$vm->setDebug(isDebug());
 	$vm->run();
 
-	echo 'Part 1: ', $vm->getOutput(), "\n";
+	echo 'Part 1: ', $part1, "\n";
 
 	$vms = [['vm' => new VM($data), 'queue' => [], 'sendcount' => 0], ['vm' => new VM($data), 'queue' => [], 'sendcount' => 0]];
 	$vms[0]['vm']->setMiscData('pid', 0)->setMiscData('partner', 1);
@@ -33,7 +65,7 @@
 		 * @param $args Args for this instruction.
 		 */
 		$vm->setInstr('snd', function($vm, $args) use (&$vms) {
-			$x = $vm->isReg($args[0]) ? $vm->getReg($args[0]) : $args[0];
+			$x = $vm->getValue($args[0]);
 
 			$vms[$vm->getMiscData('partner')]['queue'][] = $x;
 			$vms[$vm->getMiscData('pid')]['sendcount']++;
@@ -52,11 +84,13 @@
 		 * @param $args Args for this instruction.
 		 */
 		$vm->setInstr('rcv', function($vm, $args) use (&$vms) {
+			$x = $args[0];
+
 			$vm->setMiscData('waiting', false);
 			if (!empty($vms[$vm->getMiscData('pid')]['queue'])) {
 				$val = array_shift($vms[$vm->getMiscData('pid')]['queue']);
 
-				$vm->setReg($args[0], $val);
+				$vm->setReg($x, $val);
 			} else {
 				// Jump back one so that we try this again.
 				$vm->jump($vm->getLocation() - 1); // (-1 because step() always does +1)

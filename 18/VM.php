@@ -230,20 +230,6 @@
 		 */
 		private function init() {
 			/**
-			 * snd
-			 *   - snd X
-			 *
-			 * plays a sound with a frequency equal to the value of X.
-			 *
-			 * @param $vm VM to execute on.
-			 * @param $args Args for this instruction.
-			 */
-			$this->instrs['snd'] = function($vm, $args) {
-				$x = $vm->isReg($args[0]) ? $vm->getReg($args[0]) : $args[0];
-				$vm->setOutput($x);
-			};
-
-			/**
 			 * set
 			 *   - set X Y
 			 *
@@ -254,7 +240,7 @@
 			 */
 			$this->instrs['set'] = function($vm, $args) {
 				$x = $args[0];
-				$y = $vm->isReg($args[1]) ? $vm->getReg($args[1]) : $args[1];
+				$y = $vm->getValue($args[1]);
 
 				$vm->setReg($x, $y);
 			};
@@ -270,7 +256,7 @@
 			 */
 			$this->instrs['add'] = function($vm, $args) {
 				$x = $args[0];
-				$y = $vm->isReg($args[1]) ? $vm->getReg($args[1]) : $args[1];
+				$y = $vm->getValue($args[1]);
 
 				$vm->setReg($x, $vm->getReg($x) + $y);
 			};
@@ -287,7 +273,7 @@
 			 */
 			$this->instrs['mul'] = function($vm, $args) {
 				$x = $args[0];
-				$y = $vm->isReg($args[1]) ? $vm->getReg($args[1]) : $args[1];
+				$y = $vm->getValue($args[1]);
 
 				$vm->setReg($x, $vm->getReg($x) * $y);
 			};
@@ -305,28 +291,9 @@
 			 */
 			$this->instrs['mod'] = function($vm, $args) {
 				$x = $args[0];
-				$y = $vm->isReg($args[1]) ? $vm->getReg($args[1]) : $args[1];
+				$y = $vm->getValue($args[1]);
 
 				$vm->setReg($x, $vm->getReg($x) % $y);
-			};
-
-			/**
-			 * rcv
-			 *   - rcv X
-			 *
-			 * recovers the frequency of the last sound played, but only when
-			 * the value of X is not zero. (If it is zero, the command does
-			 * nothing.)
-			 *
-			 * @param $vm VM to execute on.
-			 * @param $args Args for this instruction.
-			 */
-			$this->instrs['rcv'] = function($vm, $args) {
-				$x = $vm->isReg($args[0]) ? $vm->getReg($args[0]) : $args[0];
-
-				if ($x > 0) {
-					$vm->end($vm->getOutput());
-				}
 			};
 
 			/**
@@ -342,8 +309,8 @@
 			 * @param $args Args for this instruction.
 			 */
 			$this->instrs['jgz'] = function($vm, $args) {
-				$x = $vm->isReg($args[0]) ? $vm->getReg($args[0]) : $args[0];
-				$y = $vm->isReg($args[1]) ? $vm->getReg($args[1]) : $args[1];
+				$x = $vm->getValue($args[0]);
+				$y = $vm->getValue($args[1]);
 
 				if ($x > 0) {
 					$newloc = $vm->getLocation() + (int)$y;
@@ -391,7 +358,10 @@
 
 				$next = $this->data[$this->location];
 				if ($this->debug) {
-					echo sprintf('(%4s) ', $this->location), VM::instrToString($next), ' || ', $this->dumpReg(), "\n";
+					if (isset($this->miscData['pid'])) {
+						echo sprintf('[PID: %2s] ', $this->miscData['pid']);
+					}
+					echo sprintf('(%4s)   %-20s %s', $this->location, VM::instrToString($next), $this->dumpReg()), "\n";
 					usleep($this->sleep);
 				}
 				list($instr, $data) = $next;
@@ -475,6 +445,19 @@
 		}
 
 		/**
+		 * Get the value of the given input.
+		 * If $value is a valid register, the register value will be returned,
+		 * else $value will be returned.
+		 *
+		 * @param $value Value or register name.
+		 * @return $value or value of $value register
+		 */
+		function getValue($value) {
+			if ($this->isReg($value)) { return $this->registers[$value]; }
+			return $value;
+		}
+
+		/**
 		 * Set the value of the given register.
 		 *
 		 * @param $reg Register to Set value of
@@ -494,7 +477,7 @@
 		function dumpReg() {
 			$out = [];
 			foreach ($this->registers as $reg => $val) {
-				$out[] = $reg . ': ' . $val;
+				$out[] = sprintf('%s: %-5s', $reg, $val);
 			}
 			return '[' . implode('] [', $out) . ']';
 		}
