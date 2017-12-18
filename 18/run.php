@@ -43,15 +43,18 @@
 
 	echo 'Part 1: ', $part1, "\n";
 
-	$vms = [['vm' => new VM($data), 'queue' => [], 'sendcount' => 0], ['vm' => new VM($data), 'queue' => [], 'sendcount' => 0]];
-	$vms[0]['vm']->setMiscData('pid', 0)->setMiscData('partner', 1);
-	$vms[1]['vm']->setMiscData('pid', 1)->setMiscData('partner', 0);
+	$vms = [new VM($data), new VM($data)];
+	$vms[0]->setMiscData('pid', 0)->setMiscData('partner', 1);
+	$vms[1]->setMiscData('pid', 1)->setMiscData('partner', 0);
 
-	foreach ($vms as $vminfo) {
-		$vm = $vminfo['vm'];
+	foreach ($vms as $vm) {
 		$vm->setDebug(isDebug());
 		$vm->setReg('p', $vm->getMiscData('pid'));
 		$vm->setMiscData('waiting', false);
+		$vm->setMiscData('sendcount', 0);
+		$vm->setMiscData('queue', []);
+
+		$partner = $vms[$vm->getMiscData('partner')];
 
 		/**
 		 * snd
@@ -64,11 +67,11 @@
 		 * @param $vm VM to execute on.
 		 * @param $args Args for this instruction.
 		 */
-		$vm->setInstr('snd', function($vm, $args) use (&$vms) {
+		$vm->setInstr('snd', function($vm, $args) use ($partner) {
 			$x = $vm->getValue($args[0]);
 
-			$vms[$vm->getMiscData('partner')]['queue'][] = $x;
-			$vms[$vm->getMiscData('pid')]['sendcount']++;
+			$partner->setMiscData('queue', array_merge($partner->getMiscData('queue'), [$x]));
+			$vm->setMiscData('sendcount', $vm->getMiscData('sendcount') + 1);
 		});
 
 		/**
@@ -83,12 +86,14 @@
 		 * @param $vm VM to execute on.
 		 * @param $args Args for this instruction.
 		 */
-		$vm->setInstr('rcv', function($vm, $args) use (&$vms) {
+		$vm->setInstr('rcv', function($vm, $args) {
 			$x = $args[0];
 
 			$vm->setMiscData('waiting', false);
-			if (!empty($vms[$vm->getMiscData('pid')]['queue'])) {
-				$val = array_shift($vms[$vm->getMiscData('pid')]['queue']);
+			$queue = $vm->getMiscData('queue');
+			if (!empty($queue)) {
+				$val = array_shift($queue);
+				$vm->setMiscData('queue', $queue);
 
 				$vm->setReg($x, $val);
 			} else {
@@ -102,9 +107,9 @@
 
 	while (true) {
 		$waiting = true;
-		foreach ($vms as $vminfo) {
-			$vminfo['vm']->step();
-			if (!$vminfo['vm']->getMiscData('waiting')) { $waiting = false; }
+		foreach ($vms as $vm) {
+			$vm->step();
+			$waiting &= $vm->getMiscData('waiting');
 		}
 
 		if ($waiting) {
@@ -113,4 +118,4 @@
 		}
 	}
 
-	echo 'Part 2: ', $vms[1]['sendcount'], "\n";
+	echo 'Part 2: ', $vms[1]->getMiscData('sendcount'), "\n";
