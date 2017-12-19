@@ -17,6 +17,7 @@
 		$offset['x'] -= floor($windowSize['w'] / 2);
 		$offset['y'] -= floor($windowSize['h'] / 2);
 
+		ob_start();
 		echo '┍', str_repeat('━', $windowSize['w']), '┑', "\n";
 		for ($y = $offset['y']; $y < $offset['y'] + $windowSize['h']; $y++) {
 			echo '│';
@@ -31,6 +32,7 @@
 		echo 'Collected: ', implode('', $collected), "\n";
 		echo 'Steps: ', $steps, "\n";
 		echo "\n";
+		ob_end_flush();
 
 		usleep(isset($__CLIOPTS['sleep']) ? $__CLIOPTS['sleep'] : 25000);
 	}
