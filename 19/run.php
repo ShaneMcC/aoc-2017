@@ -2,33 +2,38 @@
 <?php
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$map = getInputLines();
-	$max = [0, count($map)];
-	$pos = [0, 0];
+	$max = ['x' => 0, 'y' => count($map)];
+	$pos = ['x' => 0, 'y' => 0];
 
-	foreach ($map as &$line) { $line = str_split($line); $max[0] = max($max[0], count($line)); }
+	foreach ($map as &$line) { $line = str_split($line); $max['x'] = max($max['x'], count($line)); }
 
 	// Find starting position.
-	for ($x = 0; $x < $max[0]; $x++) {
-		if (isset($map[$pos[1]][$x]) && $map[$pos[1]][$x] == '|') {
-			$pos[0] = $x;
+	for ($x = 0; $x < $max['x']; $x++) {
+		if (isset($map[$pos['y']][$x]) && $map[$pos['x']][$x] == '|') {
+			$pos['x'] = $x;
 		}
 	}
 
-	$direction = [0, 1];
+	$directions = [['x' => 0, 'y' => 1],
+	               ['x' => 0, 'y' => -1],
+	               ['x' => -1, 'y' => 0],
+	               ['x' => 1, 'y' => 0]];
+	$direction = $directions[0];
+
 	$last = $pos;
 	$part1 = [];
 	$part2 = 0;
 
-	while ($pos[0] >= 0 && $pos[1] >= 0 && $pos[0] < $max[0] && $pos[1] < $max[1] && !empty(trim($map[$pos[1]][$pos[0]]))) {
+	while (isset($map[$pos['y']][$pos['x']]) && !empty(trim($map[$pos['y']][$pos['x']]))) {
 		$part2++;
 
-		if ($map[$pos[1]][$pos[0]] != '+') {
-			if (!in_array($map[$pos[1]][$pos[0]], ['|', '-', '+'])) { $part1[] = $map[$pos[1]][$pos[0]]; }
+		if ($map[$pos['y']][$pos['x']] != '+') {
+			if (!in_array($map[$pos['y']][$pos['x']], ['|', '-', '+'])) { $part1[] = $map[$pos['y']][$pos['x']]; }
 		} else {
 			// Find a new direction.
-			foreach ([[0, -1], [0, 1], [-1, 0], [1, 0]] as $newDir) {
-				$new = [$pos[0] + $newDir[0], $pos[1] + $newDir[1]];
-				if (isset($map[$new[1]][$new[0]]) && $new != $last && !empty(trim($map[$new[1]][$new[0]]))) {
+			foreach ($directions as $newDir) {
+				$new = ['x' => $pos['x'] + $newDir['x'], 'y' => $pos['y'] + $newDir['y']];
+				if (isset($map[$new['y']][$new['x']]) && $new != $last && !empty(trim($map[$new['y']][$new['x']]))) {
 					$direction = $newDir;
 				}
 			}
@@ -36,8 +41,8 @@
 
 		// Keep Moving in the current direction.
 		$last = $pos;
-		$pos[1] += $direction[1];
-		$pos[0] += $direction[0];
+		$pos['x'] += $direction['x'];
+		$pos['y'] += $direction['y'];
 	}
 
 	echo 'Part 1: ', implode('', $part1), "\n";
