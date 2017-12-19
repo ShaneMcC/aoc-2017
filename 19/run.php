@@ -21,14 +21,17 @@
 	$direction = $directions[0];
 
 	$last = $pos;
-	$part1 = [];
-	$part2 = 0;
+	$collected = [];
+	$steps = 0;
+
+	drawState($map, $pos, $max, $collected, $steps, false);
 
 	while (isset($map[$pos['y']][$pos['x']]) && !empty(trim($map[$pos['y']][$pos['x']]))) {
-		$part2++;
+		$steps++;
+		drawState($map, $pos, $max, $collected, $steps, true);
 
 		if ($map[$pos['y']][$pos['x']] != '+') {
-			if (!in_array($map[$pos['y']][$pos['x']], ['|', '-', '+'])) { $part1[] = $map[$pos['y']][$pos['x']]; }
+			if (!in_array($map[$pos['y']][$pos['x']], ['|', '-', '+'])) { $collected[] = $map[$pos['y']][$pos['x']]; }
 		} else {
 			// Find a new direction.
 			foreach ($directions as $newDir) {
@@ -44,6 +47,7 @@
 		$pos['x'] += $direction['x'];
 		$pos['y'] += $direction['y'];
 	}
+	drawState($map, $pos, $max, $collected, $steps, true);
 
-	echo 'Part 1: ', implode('', $part1), "\n";
-	echo 'Part 2: ', $part2, "\n";
+	echo 'Part 1: ', implode('', $collected), "\n";
+	echo 'Part 2: ', $steps, "\n";
