@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE=shanemcc/aoc-2017-01
+IMAGE=shanemcc/aoc-2017-02
 
 docker image inspect $IMAGE >/dev/null 2>&1
 if [ $? -ne 0 ]

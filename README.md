@@ -38,3 +38,18 @@ Valid options
 Input will be read from STDIN in preference to either <file> or the default files.
 $
 ```
+
+Solutions can also be run in a docker-container using (for example day 1) `./docker.sh 1` from the root directory. Command-Line flags can be passed after the day number, eg:
+```
+$ ./docker.sh 1 --help
+Usage: /code/1/run.php [options]
+
+Valid options:
+  -h, --help               Show this help output
+  -t, --test               Enable test mode (default to reading input from test.txt not input.txt)
+  -d, --debug              Enable debug mode
+      --file <file>        Read input from <file>
+
+Input will be read from STDIN in preference to either <file> or the default files.
+$
+```

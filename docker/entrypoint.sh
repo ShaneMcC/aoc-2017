@@ -1,7 +1,14 @@
 #!/bin/bash
 
 DAY="${1}"
+TIME=0;
 shift;
+
+if [ "${DAY}" = "--time" ]; then
+	TIME="1"
+	DAY="${1}"
+	shift;
+fi;
 
 if ! [[ "${DAY}" =~ ^[0-9]+$ ]]; then
 	echo 'Invalid Day: '${DAY};
@@ -13,4 +20,8 @@ if [ ! -e "/code/${DAY}/run.php" ]; then
 	exit 1;
 fi;
 
-php /code/${DAY}/run.php ${@}
+if [ "${TIME}" = "1" ]; then
+	time php /code/${DAY}/run.php ${@}
+else
+	php /code/${DAY}/run.php ${@}
+fi;
