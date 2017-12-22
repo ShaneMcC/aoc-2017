@@ -7,7 +7,10 @@
 	foreach ($input as $details) {
 		preg_match('#(.*) => (.*)#SADi', $details, $m);
 		list($all, $start, $end) = $m;
-		$enhancements[$start] = $end;
+
+		foreach (getPossibilities(stringToBlock($start)) as $possibility) {
+			$enhancements[$possibility] = $end;
+		}
 	}
 
 	$start = [['.', '#', '.'], ['.', '.', '#'], ['#', '#', '#']];
@@ -111,12 +114,10 @@
 
 	function enhance($block) {
 		global $enhancements;
-		$result = [];
+		$str = blockToString($block);
 
-		foreach (getPossibilities($block) as $possibility) {
-			if (isset($enhancements[$possibility])) {
-				return stringToBlock($enhancements[$possibility]);
-			}
+		if (isset($enhancements[$str])) {
+			return stringToBlock($enhancements[$str]);
 		}
 
 		die('Unable to enhance: ' . blockToString($block) . "\n");
