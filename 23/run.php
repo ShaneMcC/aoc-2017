@@ -1,19 +1,27 @@
 #!/usr/bin/php
 <?php
+	$__CLI['long'] = ['none', 'partial'];
+	$__CLI['extrahelp'] = [];
+	$__CLI['extrahelp'][] = '      --none               Do no optimisations.';
+	$__CLI['extrahelp'][] = '      --partial            Only do partial optimisations.';
+
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	require_once(dirname(__FILE__) . '/../18/VM.php');
+	require_once(dirname(__FILE__) . '/VMOptimisations.php');
 
 	$data = VM::parseInstrLines(getInputLines());
 	$vm = new VM($data);
 	$part1 = 0;
 
-	$vm->setInstr('set', function($vm, $args) {
-		$x = $args[0];
-		$y = $vm->getValue($args[1]);
-
-		$vm->setReg($x, $y);
-	});
-
+	/**
+	 * sub
+	 *   - sub X Y
+	 *
+	 * decreases register X by the value of Y.
+	 *
+	 * @param $vm VM to execute on.
+	 * @param $args Args for this instruction.
+	 */
 	$vm->setInstr('sub', function($vm, $args) {
 		$x = $args[0];
 		$y = $vm->getValue($args[1]);
@@ -21,6 +29,16 @@
 		$vm->setReg($x, $vm->getReg($x) - $y);
 	});
 
+	/**
+	 * mul
+	 *   - mul X Y
+	 *
+	 * sets register X to the result of multiplying the value contained
+	 * in register X by the value of Y.
+	 *
+	 * @param $vm VM to execute on.
+	 * @param $args Args for this instruction.
+	 */
 	$vm->setInstr('mul', function($vm, $args) use (&$part1) {
 		$x = $args[0];
 		$y = $vm->getValue($args[1]);
@@ -29,6 +47,17 @@
 		$part1++;
 	});
 
+	/**
+	 * jnz
+	 *   - jnz X Y
+	 *
+	 * jumps with an offset of the value of Y, but only if the value
+	 * of X is not zero. (An offset of 2 skips the next instruction, an offset
+	 * of -1 jumps to the previous instruction, and so on.)
+	 *
+	 * @param $vm VM to execute on.
+	 * @param $args Args for this instruction.
+	 */
 	$vm->setInstr('jnz', function($vm, $args) {
 		$x = $vm->getValue($args[0]);
 		$y = $vm->getValue($args[1]);
@@ -47,84 +76,13 @@
 	$vm->setReg('a', 1);
 	$vm->setDebug(isDebug(), 0);
 
-	/**
-	 * Add optimisation for prime check.
-	 *
-	 *    0: set e 2
-	 *    1: set g d
-	 *    2: mul g e
-	 *    3: sub g b
-	 *    4: jnz g 2
-	 *    5: set f 0
-	 *    6: sub e -1
-	 *    7: set g e
-	 *    8: sub g b
-	 *    9: jnz g -8
-	 *   10: sub d -1
-	 *   11: set g d
-	 *   12: sub g b
-	 *   13: jnz g -13
-	 *
-	 *	D = E = B
-	 *	G = 0
-	 *	F = isPrime(B) ? 1 : 0;
-	 */
-	$vm->addReadAhead(function ($vm) {
-		$loc = $vm->getLocation();
-		if (!$vm->hasData($loc + 13)) { return FALSE; }
-
-		$data = [];
-		for ($i = 0; $i <= 13; $i++) { $data[$i] = $vm->getData($loc + $i); }
-
-		// Check for matching instructions.
-		if ($data[0][0] == 'set' && $data[0][1][0] == 'e' && $data[0][1][1] == '2' &&
-			$data[1][0] == 'set' && $data[1][1][0] == 'g' && $data[1][1][1] == 'd' &&
-			$data[2][0] == 'mul' && $data[2][1][0] == 'g' && $data[2][1][1] == 'e' &&
-			$data[3][0] == 'sub' && $data[3][1][0] == 'g' && $data[3][1][1] == 'b' &&
-			$data[4][0] == 'jnz' && $data[4][1][0] == 'g' && $data[4][1][1] == '2' &&
-			$data[5][0] == 'set' && $data[5][1][0] == 'f' && $data[5][1][1] == '0' &&
-			$data[6][0] == 'sub' && $data[6][1][0] == 'e' && $data[6][1][1] == '-1' &&
-			$data[7][0] == 'set' && $data[7][1][0] == 'g' && $data[7][1][1] == 'e' &&
-			$data[8][0] == 'sub' && $data[8][1][0] == 'g' && $data[8][1][1] == 'b' &&
-			$data[9][0] == 'jnz' && $data[9][1][0] == 'g' && $data[9][1][1] == '-8' &&
-			$data[10][0] == 'sub' && $data[10][1][0] == 'd' && $data[10][1][1] == '-1' &&
-			$data[11][0] == 'set' && $data[11][1][0] == 'g' && $data[11][1][1] == 'd' &&
-			$data[12][0] == 'sub' && $data[12][1][0] == 'g' && $data[12][1][1] == 'b' &&
-			$data[13][0] == 'jnz' && $data[13][1][0] == 'g' && $data[13][1][1] == '-13'
-		) {
-			debugOut('Optimised prime check: ');
-			debugOut(VM::instrToString($data[0]), ' -> ');
-			debugOut(VM::instrToString($data[1]), ' -> ');
-			debugOut(VM::instrToString($data[2]), ' -> ');
-			debugOut(VM::instrToString($data[3]), ' -> ');
-			debugOut(VM::instrToString($data[4]), ' -> ');
-			debugOut(VM::instrToString($data[5]), ' -> ');
-			debugOut(VM::instrToString($data[6]), ' -> ');
-			debugOut(VM::instrToString($data[7]), ' -> ');
-			debugOut(VM::instrToString($data[8]), ' -> ');
-			debugOut(VM::instrToString($data[9]), ' -> ');
-			debugOut(VM::instrToString($data[10]), ' -> ');
-			debugOut(VM::instrToString($data[11]), ' -> ');
-			debugOut(VM::instrToString($data[12]), ' -> ');
-			debugOut(VM::instrToString($data[13]), "\n");
-
-			for ($d = $data[0][1][1]; $d < $vm->getReg('b'); $d++) {
-				if ($vm->getReg('b') % $d == 0) {
-					$vm->setReg($data[5][1][0], $data[5][1][1]);
-					break;
-				}
-			}
-
-			$vm->setReg('d', $vm->getReg('b'));
-			$vm->setReg('e', $vm->getReg('b'));
-			$vm->setReg('g', 0);
-
-			// Jump to after the thing.
-			return $loc + 14;
+	if (!isset($__CLIOPTS['none'])) {
+		if (isset($__CLIOPTS['partial'])) {
+			$vm->addReadAhead('partialOptimise');
+		} else {
+			$vm->addReadAhead('fullyOptimise');
 		}
-
-		return FALSE;
-	});
+	}
 
 	$vm->run();
 	echo 'Part 2: ', $vm->getReg('h'), "\n";
