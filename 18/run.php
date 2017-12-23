@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 	require_once(dirname(__FILE__) . '/../common/common.php');
-	require_once(dirname(__FILE__) . '/VM.php');
+	require_once(dirname(__FILE__) . '/../common/VM.php');
 
 	$data = VM::parseInstrLines(getInputLines());
 	$vm = new VM($data);

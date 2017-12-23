@@ -1,7 +1,7 @@
 <?php
 
 	/**
-	 * Simple 4-register, 4-instruction VM for Day 12.
+	 * Simple VM
 	 */
 	class VM {
 		/** Current location. */
@@ -262,6 +262,22 @@
 			};
 
 			/**
+			 * sub
+			 *   - sub X Y
+			 *
+			 * decreases register X by the value of Y.
+			 *
+			 * @param $vm VM to execute on.
+			 * @param $args Args for this instruction.
+			 */
+			$this->instrs['sub'] = function($vm, $args) {
+				$x = $args[0];
+				$y = $vm->getValue($args[1]);
+
+				$vm->setReg($x, $vm->getReg($x) - $y);
+			};
+
+			/**
 			 * mul
 			 *   - mul X Y
 			 *
@@ -313,6 +329,72 @@
 				$y = $vm->getValue($args[1]);
 
 				if ($x > 0) {
+					$newloc = $vm->getLocation() + (int)$y;
+					$vm->jump($newloc - 1); // (-1 because step() always does +1)
+				}
+			};
+
+			/**
+			 * jnz
+			 *   - jnz X Y
+			 *
+			 * jumps with an offset of the value of Y, but only if the value
+			 * of X is not zero. (An offset of 2 skips the next instruction, an offset
+			 * of -1 jumps to the previous instruction, and so on.)
+			 *
+			 * @param $vm VM to execute on.
+			 * @param $args Args for this instruction.
+			 */
+			$this->instrs['jnz'] = function($vm, $args) {
+				$x = $vm->getValue($args[0]);
+				$y = $vm->getValue($args[1]);
+
+				if ($x != 0) {
+					$newloc = $vm->getLocation() + (int)$y;
+					$vm->jump($newloc - 1); // (-1 because step() always does +1)
+				}
+			};
+
+			/**
+			 * jlz
+			 *   - jlz X Y
+			 *
+			 * jumps with an offset of the value of Y, but only if the value
+			 * of X is less than zero. (An offset of 2 skips the next
+			 * instruction, an offset of -1 jumps to the previous instruction,
+			 * and so on.)
+			 *
+			 * @param $vm VM to execute on.
+			 * @param $args Args for this instruction.
+			 */
+			$this->instrs['jlz'] = function($vm, $args) {
+				$x = $vm->getValue($args[0]);
+				$y = $vm->getValue($args[1]);
+
+				if ($x < 0) {
+					$newloc = $vm->getLocation() + (int)$y;
+					$vm->jump($newloc - 1); // (-1 because step() always does +1)
+				}
+			};
+
+
+			/**
+			 * jez
+			 *   - jez X Y
+			 *
+			 * jumps with an offset of the value of Y, but only if the value
+			 * of X is equal to zero. (An offset of 2 skips the next
+			 * instruction, an offset of -1 jumps to the previous instruction,
+			 * and so on.)
+			 *
+			 * @param $vm VM to execute on.
+			 * @param $args Args for this instruction.
+			 */
+			$this->instrs['jez'] = function($vm, $args) {
+				$x = $vm->getValue($args[0]);
+				$y = $vm->getValue($args[1]);
+
+				if ($x == 0) {
 					$newloc = $vm->getLocation() + (int)$y;
 					$vm->jump($newloc - 1); // (-1 because step() always does +1)
 				}
