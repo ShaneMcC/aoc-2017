@@ -90,8 +90,8 @@
 	$answers[2][22] = 2511895;
 
 	// Day 23
-	$answers[1][23] = NULL;
-	$answers[2][23] = NULL;
+	$answers[1][23] = 4225;
+	$answers[2][23] = 905;
 
 	// Day 24
 	$answers[1][24] = NULL;
