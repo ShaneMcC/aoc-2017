@@ -26,7 +26,7 @@
 		$result = empty($current) ? [] : [$current];
 
 		foreach ($possible as $p) {
-			$nextConnector = ($components[$p]['pins'][0] == $connector) ? $components[$p]['pins'][1] : $components[$p]['pins'][0];
+			$nextConnector = ($components[$p]['score'] - $connector);
 			$nextComponents = $components;
 			unset($nextComponents[$p]);
 
