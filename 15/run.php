@@ -1,7 +1,6 @@
 #!/usr/bin/php
 <?php
 	require_once(dirname(__FILE__) . '/../common/common.php');
-	require_once(dirname(__FILE__) . '/../10/KnotHash.php');
 	$input = getInputLines();
 
 	class AOCGenerator {
