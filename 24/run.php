@@ -9,13 +9,11 @@
 		$components[] = ['pins' => [$left, $right], 'score' => ($left + $right)];
 	}
 
-	function findComponents($pinCount, $excludes = []) {
-		global $components;
-
+	function findComponents($components, $pinCount) {
 		$results = [];
 
 		foreach ($components as $c => $info) {
-			if (in_array($pinCount, $info['pins']) && !in_array($c, $excludes)) {
+			if (in_array($pinCount, $info['pins'])) {
 				$results[] = $c;
 			}
 		}
@@ -23,49 +21,38 @@
 		return $results;
 	}
 
-	function findBridges($connector, $current = []) {
-		global $components;
-
-		$possible = findComponents($connector, $current);
+	function findBridges($connector, $components, $current = []) {
+		$possible = findComponents($components, $connector);
 		$result = empty($current) ? [] : [$current];
 
 		foreach ($possible as $p) {
 			$nextConnector = ($components[$p]['pins'][0] == $connector) ? $components[$p]['pins'][1] : $components[$p]['pins'][0];
-			$result = array_merge($result, findBridges($nextConnector, array_merge($current, [$p])));
+			$nextComponents = $components;
+			unset($nextComponents[$p]);
+
+			$result = array_merge($result, findBridges($nextConnector, $nextComponents, array_merge($current, [$p])));
 		}
 
 		return $result;
 	}
-	$finishedBridges = findBridges(0);
 
-	function bridgeInfo($bridge) {
-		global $components;
+	$part1 = $longest = $part2 = 0;
+	foreach (findBridges(0, $components) as $bridge) {
+		$score = array_reduce($bridge, function($c, $i) use ($components) { return $c + $components[$i]['score']; }, 0);
 
-		$score = 0;
-		$b = [];
-		foreach ($bridge as $bits) {
-			$score += $components[$bits]['score'];
-			$b[] = implode('/', $components[$bits]['pins']);
-		}
-		return [implode('--', $b), $score];
-	}
-
-	$part1 = 0;
-	$part2_len = 0;
-	$part2 = 0;
-	foreach ($finishedBridges as $bridge) {
-		$bi = bridgeInfo($bridge);
-
-		if (count($bridge) > $part2_len) {
-			$part2 = $bi[1];
-			$part2_len = count($bridge);
-		} else if (count($bridge) == $part2_len) {
-			$part2 = max($part2, $bi[1]);
-			$part2_len = count($bridge);
+		if (count($bridge) > $longest) {
+			$part2 = $score;
+			$longest = count($bridge);
+		} else if (count($bridge) == $longest) {
+			$part2 = max($part2, $score);
+			$longest = count($bridge);
 		}
 
-		$part1 = max($part1, $bi[1]);
-		debugOut('Bridge: ', $bi[0], ' => ', $bi[1], "\n");
+		$part1 = max($part1, $score);
+
+		if (isDebug()) {
+			echo 'Bridge: ', bridgeInfo($bridge), ' => ', $score, "\n";
+		}
 	}
 
 	echo 'Part 1: ', $part1, "\n";
