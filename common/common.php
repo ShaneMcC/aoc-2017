@@ -2,9 +2,6 @@
 	/* Some of these are not memory efficient, so don't bother caring. */
 	ini_set('memory_limit', '-1');
 
-	/* Known Answers so far for comparing output after any changes. */
-	require_once(dirname(__FILE__) . '/answers.php');
-
 	/*
 	 * To make code easier to read, sometimes we move "fluff" code to a separate
 	 * file, include it if it exists.
@@ -14,6 +11,27 @@
 	 */
 	if (file_exists(realpath(dirname($_SERVER['PHP_SELF'])) . '/fluff.php')) {
 		require_once(realpath(dirname($_SERVER['PHP_SELF'])) . '/fluff.php');
+	}
+
+	/**
+	 * Get the answer for this day if known.
+	 */
+	function getAnswer($part) {
+		$file = realpath(dirname($_SERVER['PHP_SELF'])) . '/answers.txt';
+
+		$answers = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+		if (isset($answers[$part - 1])) {
+			return $answers[$part - 1];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the answers to both parts of the day.
+	 */
+	function getAnswers() {
+		return [1 => getAnswer(1), 2 => getAnswer(2)];
 	}
 
 	/**
@@ -28,15 +46,19 @@
 	function getInputFilename() {
 		global $__CLIOPTS;
 
-		if (!posix_isatty(STDIN)) {
-			return 'php://stdin';
-		} else if (isset($__CLIOPTS['file']) && file_exists($__CLIOPTS['file'])) {
-			return $__CLIOPTS['file'];
-		}
+		if (getenv("TIMED") !== FALSE) {
+			return realpath(dirname($_SERVER['PHP_SELF'])) . '/input.txt';
+		} else {
+			if (!posix_isatty(STDIN)) {
+				return 'php://stdin';
+			} else if (isset($__CLIOPTS['file']) && file_exists($__CLIOPTS['file'])) {
+				return $__CLIOPTS['file'];
+			}
 
-		$default = realpath(dirname($_SERVER['PHP_SELF'])) . '/' . basename(isTest() ? 'test.txt' : 'input.txt');
-		if (file_exists($default)) {
-			return $default;
+			$default = realpath(dirname($_SERVER['PHP_SELF'])) . '/' . basename(isTest() ? 'test.txt' : 'input.txt');
+			if (file_exists($default)) {
+				return $default;
+			}
 		}
 
 		die('No valid input found.');
@@ -254,27 +276,29 @@
 		return (substr($haystack, -$length) === $needle);
 	}
 
-	/**
-	 * Get an ascii Wreath as a string.
-	 * (Credit to 'jgs' for the original wreath ascii)
-	 *
-	 * @param $colour Colourise the wreath.
-	 * @return The wreath
-	 */
-	function getWreath($colour = true) {
-			$canColour = $colour && (function_exists('posix_isatty') && posix_isatty(STDOUT)) || getenv('ANSICON') !== FALSE;
+	// Remove unneeded stuff when timing.
+	if (getenv("TIMED") === FALSE) {
+		/**
+		 * Get an ascii Wreath as a string.
+		 * (Credit to 'jgs' for the original wreath ascii)
+		 *
+		 * @param $colour Colourise the wreath.
+		 * @return The wreath
+		 */
+		function getWreath($colour = true) {
+				$canColour = $colour && (function_exists('posix_isatty') && posix_isatty(STDOUT)) || getenv('ANSICON') !== FALSE;
 
-			if ($canColour) {
-				$name = "\033[0m";
-				$wreath = "\033[0;32m";
-				$bow = "\033[1;31m";
-				$berry = "\033[1;31m";
-				$reset = "\033[0m";
-			} else {
-				$reset = $berry = $bow = $wreath = $name = '';
-			}
+				if ($canColour) {
+					$name = "\033[0m";
+					$wreath = "\033[0;32m";
+					$bow = "\033[1;31m";
+					$berry = "\033[1;31m";
+					$reset = "\033[0m";
+				} else {
+					$reset = $berry = $bow = $wreath = $name = '';
+				}
 
-			return <<<WREATH
+				return <<<WREATH
 $wreath           ,...., $reset
 $wreath        ,;;:${berry}o$wreath;;;${berry}o$wreath;;, $reset
 $wreath      ,;;${berry}o$wreath;'''''';;;;, $reset
@@ -290,36 +314,36 @@ $bow          |/    \| $name    - ShaneMcC $reset
 $reset
 
 WREATH;
-	}
+		}
 
-	/**
-	 * Get an ascii Tree as a string.
-	 * (Credit to 'jgs' for the original tree ascii, this was modified to be
-	 * taller)
-	 *
-	 * @param $colour Colourise the tree.
-	 * @return The tree
-	 */
-	function getTree($colour = true) {
-			$canColour = $colour && (function_exists('posix_isatty') && posix_isatty(STDOUT)) || getenv('ANSICON') !== FALSE;
+		/**
+		 * Get an ascii Tree as a string.
+		 * (Credit to 'jgs' for the original tree ascii, this was modified to be
+		 * taller)
+		 *
+		 * @param $colour Colourise the tree.
+		 * @return The tree
+		 */
+		function getTree($colour = true) {
+				$canColour = $colour && (function_exists('posix_isatty') && posix_isatty(STDOUT)) || getenv('ANSICON') !== FALSE;
 
-			if ($canColour) {
-				$name = "\033[0m";
-				$reset = "\033[0m";
+				if ($canColour) {
+					$name = "\033[0m";
+					$reset = "\033[0m";
 
-				$star = "\033[1;33m";
-				$tree = "\033[0;32m";
-				$snow = "\033[1;37m";
-				$box = "\033[1;30m";
-				$led1 = "\033[1;31m";
-				$led2 = "\033[1;34m";
-				$led3 = "\033[1;35m";
-				$led4 = "\033[1;36m";
-			} else {
-				$reset = $box = $star = $tree = $snow = $led1 = $led2 = $led3 = $led4 = $name = '';
-			}
+					$star = "\033[1;33m";
+					$tree = "\033[0;32m";
+					$snow = "\033[1;37m";
+					$box = "\033[1;30m";
+					$led1 = "\033[1;31m";
+					$led2 = "\033[1;34m";
+					$led3 = "\033[1;35m";
+					$led4 = "\033[1;36m";
+				} else {
+					$reset = $box = $star = $tree = $snow = $led1 = $led2 = $led3 = $led4 = $name = '';
+				}
 
-			return <<<TREE
+				return <<<TREE
 $star             ' $reset
 $star           - * - $reset
 $tree            /.\ $reset
@@ -335,37 +359,37 @@ $tree      ^^^^^^${box}[_]$tree^^^^^^ $name - ShaneMcC $reset
 $reset
 
 TREE;
-	}
+		}
 
-	/**
-	 * Get an ascii Santa as a string.
-	 * (Credit to 'ldb' for the original Santa ascii, this was modified slightly)
-	 *
-	 * @param $colour Colourise the wreath.
-	 * @return The wreath
-	 */
-	function getSanta($colour = true) {
-			$canColour = $colour && (function_exists('posix_isatty') && posix_isatty(STDOUT)) || getenv('ANSICON') !== FALSE;
+		/**
+		 * Get an ascii Santa as a string.
+		 * (Credit to 'ldb' for the original Santa ascii, this was modified slightly)
+		 *
+		 * @param $colour Colourise the wreath.
+		 * @return The wreath
+		 */
+		function getSanta($colour = true) {
+				$canColour = $colour && (function_exists('posix_isatty') && posix_isatty(STDOUT)) || getenv('ANSICON') !== FALSE;
 
-			if ($canColour) {
-				$name = "\033[0m";
-				$beard = "\033[1;37m";
-				$trim = "\033[1;37m";
-				$hat = "\033[1;31m";
-				$suit = "\033[1;31m";
-				$hands = "\033[1;33m";
-				$eyes = "\033[1;34m";
-				$nose = "\033[1;31m";
-				$buttons = "\033[1;37m";
-				$belt = "\033[1;37m";
-				$buckle = "\033[1;33m";
-				$boots = "\033[1;37m";
-				$reset = "\033[0m";
-			} else {
-				$name = $beard = $trim = $hat = $suit = $hands = $eyes = $nose = $buttons = $belt = $buckle = $boots = $reset = '';
-			}
+				if ($canColour) {
+					$name = "\033[0m";
+					$beard = "\033[1;37m";
+					$trim = "\033[1;37m";
+					$hat = "\033[1;31m";
+					$suit = "\033[1;31m";
+					$hands = "\033[1;33m";
+					$eyes = "\033[1;34m";
+					$nose = "\033[1;31m";
+					$buttons = "\033[1;37m";
+					$belt = "\033[1;37m";
+					$buckle = "\033[1;33m";
+					$boots = "\033[1;37m";
+					$reset = "\033[0m";
+				} else {
+					$name = $beard = $trim = $hat = $suit = $hands = $eyes = $nose = $buttons = $belt = $buckle = $boots = $reset = '';
+				}
 
-			return <<<SANTA
+				return <<<SANTA
 $hat             ,---.{$trim}_ $reset
 $trim           _{$hat}/{$trim}_,_{$hat}\\{$trim}(_) $reset
 $trim          (_,_,,_,) $reset
@@ -381,40 +405,41 @@ $boots        (___)   (___) $name - ShaneMcC $reset
 $reset
 
 SANTA;
-	}
-
-
-	/**
-	 * Output one of the ascii headers.
-	 *
-	 * @param $colour Colourise the header.
-	 * @return The header
-	 */
-	function getAsciiHeader($colour = true) {
-		echo (rand(0,2) == 0 ? getSanta($colour) : (rand(0,1) ? getWreath($colour) : getTree($colour)));
-	}
-
-	try {
-		$__CLI['short'] = "hdtw" . (isset($__CLI['short']) && is_array($__CLI['short']) ? implode('', $__CLI['short']) : '');
-		$__CLI['long'] = array_merge(['help', 'file:', 'debug', 'test'], (isset($__CLI['long']) && is_array($__CLI['long']) ? $__CLI['long'] : []));
-		$__CLIOPTS = @getopt($__CLI['short'], $__CLI['long']);
-		if (isset($__CLIOPTS['h']) || isset($__CLIOPTS['help'])) {
-			echo getAsciiHeader(), "\n";
-			echo 'Usage: ', $_SERVER['argv'][0], ' [options]', "\n";
-			echo '', "\n";
-			echo 'Valid options:', "\n";
-			echo '  -h, --help               Show this help output', "\n";
-			echo '  -t, --test               Enable test mode (default to reading input from test.txt not input.txt)', "\n";
-			echo '  -d, --debug              Enable debug mode', "\n";
-			echo '      --file <file>        Read input from <file>', "\n";
-			if (isset($__CLI['extrahelp']) && is_array($__CLI['extrahelp'])) {
-				echo '', "\n";
-				echo 'Additional script-specific options:', "\n";
-				foreach ($__CLI['extrahelp'] as $line) { echo $line, "\n"; }
-			}
-			echo '', "\n";
-			echo 'Input will be read from STDIN in preference to either <file> or the default files.', "\n";
-			die();
 		}
-	} catch (Exception $e) { /* Do nothing. */ }
-	if (!isset($__CLIOPTS['w'])) { echo getAsciiHeader(), "\n"; }
+
+
+		/**
+		 * Output one of the ascii headers.
+		 *
+		 * @param $colour Colourise the header.
+		 * @return The header
+		 */
+		function getAsciiHeader($colour = true) {
+			echo (rand(0,2) == 0 ? getSanta($colour) : (rand(0,1) ? getWreath($colour) : getTree($colour)));
+		}
+
+		try {
+			$__CLI['short'] = "hdtw" . (isset($__CLI['short']) && is_array($__CLI['short']) ? implode('', $__CLI['short']) : '');
+			$__CLI['long'] = array_merge(['help', 'file:', 'debug', 'test'], (isset($__CLI['long']) && is_array($__CLI['long']) ? $__CLI['long'] : []));
+			$__CLIOPTS = @getopt($__CLI['short'], $__CLI['long']);
+			if (isset($__CLIOPTS['h']) || isset($__CLIOPTS['help'])) {
+				echo getAsciiHeader(), "\n";
+				echo 'Usage: ', $_SERVER['argv'][0], ' [options]', "\n";
+				echo '', "\n";
+				echo 'Valid options:', "\n";
+				echo '  -h, --help               Show this help output', "\n";
+				echo '  -t, --test               Enable test mode (default to reading input from test.txt not input.txt)', "\n";
+				echo '  -d, --debug              Enable debug mode', "\n";
+				echo '      --file <file>        Read input from <file>', "\n";
+				if (isset($__CLI['extrahelp']) && is_array($__CLI['extrahelp'])) {
+					echo '', "\n";
+					echo 'Additional script-specific options:', "\n";
+					foreach ($__CLI['extrahelp'] as $line) { echo $line, "\n"; }
+				}
+				echo '', "\n";
+				echo 'Input will be read from STDIN in preference to either <file> or the default files.', "\n";
+				die();
+			}
+		} catch (Exception $e) { /* Do nothing. */ }
+		if (!isset($__CLIOPTS['w'])) { echo getAsciiHeader(), "\n"; }
+	}
